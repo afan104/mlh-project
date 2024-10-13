@@ -12,8 +12,6 @@ import pyautogui
 import numpy as np
 import time
 
-global xcoef, ycoef
-
 class CalibrateScreen(tk.Frame, gazeObject, camObject, cellWidth, cellHeight):
     def __init__(self, window, app):
         self.window = window
@@ -36,6 +34,8 @@ class CalibrateScreen(tk.Frame, gazeObject, camObject, cellWidth, cellHeight):
         self.cellHeight = cellHeight
         self.screenWidth = pyautogui.size()[0]
         self.screenHeight = pyautogui.size()[1]
+        self.xcoeffs = 0
+        self.ycoeffs = 0
 
         # Instructions message
         self.display_instructions()
@@ -210,8 +210,7 @@ class CalibrateScreen(tk.Frame, gazeObject, camObject, cellWidth, cellHeight):
         self.window.destroy()
 
         # mappingfunction
-        global xcoef, ycoef
-        xcoef, ycoef = self.calculateFunctionGrid()
+        self.calculateFunctionGrid()
 
     def calculateFunctionGrid(self):
         # setup grid 
@@ -235,7 +234,6 @@ class CalibrateScreen(tk.Frame, gazeObject, camObject, cellWidth, cellHeight):
         y_pixel = np.array(targets[:,1])
 
         # calculate polyfit
-        ycoeffs = np.polyfit(y_eye, y_pixel, 2)
-        xcoeffs = np.polyfit(x_eye, x_pixel, 2)
-        print(f"{ycoeffs}, {xcoeffs}")
-        return [xcoeffs, ycoeffs]
+        self.xcoeffs = np.polyfit(x_eye, x_pixel, 2)
+        self.ycoeffs = np.polyfit(y_eye, y_pixel, 2)
+        print(f"{self.xcoeffs}, {self.ycoeffs}")
