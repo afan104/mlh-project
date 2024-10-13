@@ -41,7 +41,7 @@ Improving accuracy
 
 We applied a moving average function to smooth out the mouses movements with a frame of three. We found that this smoothed the mouse data without causing a significant lag. Additionally, we split the screen into a grid of 20x20 pixels. This decreased the resolution the eye data had to map to, thus reducing the jitter motion of the mouse. We found the 20-40 cell blocks improved mouse movement. 
 
-Due to the limits of using webcam the mouse has significant jitter making it hard to hover and click over any element on the screen. To overcome this we tried snapping the mouse toward elements on the screen that the user may be interested in. We did this by opening a webpage, using selenium to extract clickable elements (buttons, links and search bars) and calculating the distance of the current x/y pixel estimate to each element on screen. If they element is within 100 pixels it will be weighted toward that element. This decreased jitter near clickable elements and increasing the likelihood of successfully clicking an item. More testing needs to be done to improve this functionality, and thus it was not included in the main application. It was however included as a separate file called helperfunctions. 
+Due to the limits of using webcam the mouse has significant jitter making it hard to hover and click over any element on the screen. To overcome this we tried snapping the mouse toward elements on the screen that the user may be interested in. We did this by opening a webpage, using selenium to extract clickable elements (buttons, links and search bars) and calculating the distance of the current x/y pixel estimate to each element on screen. If they element is within 100 pixels it will be weighted toward that element. This decreased jitter near clickable elements and increasing the likelihood of successfully clicking an item. More testing needs to be done to improve this functionality, and thus it was not included in the main application. It was however included as a separate file called unintegrated_helperfunctions. 
 
 User Interface
 
@@ -59,6 +59,13 @@ This project is a basis for a free, simple gaze controlled mouse. Future directi
 
 ## Inspiration 
 For people with motor disorders, using a mouse can be difficult. Eye tracking technology makes using computers more accessible. However the technology can be expensive, or require extensive calibration. We wanted to make an easy to setup and use eye controlled mouse that could be calibrated in a couple minutes, and have enough accuracy to be useable.
+
+## File Locations
+1. testing.py: contains the working code for calibrating the controller and using the eye controlled mouse.
+2. app.py is the starting code for the improved user interface.
+3. calibrate_frame.py: contains the class to the calibrate using the improved interface.
+4. mouse_controller.py: contains the class to move the mouse using the calibration coefficients. 
+5. unintegrated_helperfunctions.py: contains commented out methods for weighting the mouse location toward clickable elements on the screen. 
 
 ## Installation
 
