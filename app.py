@@ -2,13 +2,19 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from calibrate_frame import CalibrateScreen
+import cv2
+from GazeTracking.gaze_tracking import GazeTracking
 
 
-class EyeTrackingApp(tk.Tk):
+class EyeTrackingApp(tk.Tk, gaze, webcam):
     def __init__(self, root, theme="morph"):
         self.root = root
+        self.gaze = gaze
+        self.webcam = webcam
         self.root.geometry("800x600")
         self.root.title("Eye Tracking App")
+
+        self.xcoeff, self.ycoeff = None, None
 
         # Define styles
         self.style = ttk.Style(theme=theme)
@@ -53,10 +59,13 @@ class EyeTrackingApp(tk.Tk):
         for widget in self.root.winfo_children():
             widget.destroy()
         # Instantiate the Calibrate class
-        self.calibrate_frame = CalibrateScreen(self.root, self)
+        CalibrateScreen(self.root, self.gaze, self.webcam, 20, 20, self)
 
 
 if __name__ == "__main__":
+    gaze = GazeTracking()
+    webcam = cv2.VideoCapture(0)
+
     root = tk.Tk()
-    app = EyeTrackingApp(root)
+    app = EyeTrackingApp(root, gaze, webcam)
     root.mainloop()

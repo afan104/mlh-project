@@ -12,8 +12,8 @@ import pyautogui
 import numpy as np
 import time
 
-class CalibrateScreen(tk.Frame, gazeObject, camObject, cellWidth, cellHeight):
-    def __init__(self, window, app):
+class CalibrateScreen(tk.Frame):
+    def __init__(self, window, gazeObject, camObject, cellWidth, cellHeight, app):
         self.window = window
         self.window.attributes("-fullscreen", True)
         self.app = app
@@ -234,6 +234,8 @@ class CalibrateScreen(tk.Frame, gazeObject, camObject, cellWidth, cellHeight):
         y_pixel = np.array(targets[:,1])
 
         # calculate polyfit
-        self.xcoeffs = np.polyfit(x_eye, x_pixel, 2)
-        self.ycoeffs = np.polyfit(y_eye, y_pixel, 2)
+        self.app.xcoeffs = np.polyfit(x_eye, x_pixel, 2)
+        self.app.ycoeffs = np.polyfit(y_eye, y_pixel, 2)
         print(f"{self.xcoeffs}, {self.ycoeffs}")
+    
+    
