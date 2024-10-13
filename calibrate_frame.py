@@ -4,11 +4,10 @@ Check the README.md for complete documentation.
 """
 
 import cv2
-from gaze_tracking import GazeTracking
+from GazeTracking.gaze_tracking import GazeTracking
 import tkinter as tk
 import ttkbootstrap as ttk
 import threading
-from gaze_processing import *
 
 # xWidth, yHeight = pyautogui.size()
 xcoef = []

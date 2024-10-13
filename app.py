@@ -1,7 +1,7 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from gui.calibrate_frame import CalibrateScreen
+from calibrate_frame import CalibrateScreen
 
 
 class EyeTrackingApp(tk.Tk):
