@@ -1,5 +1,3 @@
 .venv/
-gaze_processing.py
-gaze_tracking/
 __pycache__/
 .DS_Store
