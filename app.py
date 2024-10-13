@@ -6,6 +6,7 @@ from mouse_controller import MouseController
 import pyautogui
 import cv2
 from GazeTracking.gaze_tracking import GazeTracking
+import numpy as np
 
 
 class EyeTrackingApp(tk.Tk):
@@ -63,9 +64,13 @@ class EyeTrackingApp(tk.Tk):
         # Instantiate the Calibrate class
         CalibrateScreen(self.root, self.gaze, self.webcam, 20, 20, self)
 
+    # get xcoeff and ycoeff from CalibrateScreen
+    def get_coeffs(self):
+        return self.xcoeff, self.ycoeff
+
 
 if __name__ == "__main__":
-    cellWidth  = 20 
+    cellWidth = 20
     cellHeight = 20
     screenWidth = pyautogui.size()[0]
     screenHeight = pyautogui.size()[1]
@@ -76,10 +81,20 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = EyeTrackingApp(root, gaze, webcam)
     root.mainloop()
+    xcoeff, ycoeff = app.get_coeffs()
 
     # Start tracking
-    if app.xcoeff != None and app.ycoeff != None:
-        app = MouseController(app.xcoeff, app.ycoeff, gaze, webcam, cellWidth, cellHeight, screenWidth, screenHeight)
+    if np.all(xcoeff is not None) and np.all(ycoeff is not None):
+        app = MouseController(
+            xcoeff,
+            ycoeff,
+            gaze,
+            webcam,
+            cellWidth,
+            cellHeight,
+            screenWidth,
+            screenHeight,
+        )
 
     webcam.release()
     cv2.destroyAllWindows()

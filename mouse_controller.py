@@ -3,8 +3,19 @@ from GazeTracking.gaze_tracking import GazeTracking
 import pyautogui
 import numpy as np
 
-class MouseController():
-    def __init__(self, xcoeffs, ycoeffs, gaze, webcam, cellWidth, cellHeight, screenWidth, screenHeight):
+
+class MouseController:
+    def __init__(
+        self,
+        xcoeffs,
+        ycoeffs,
+        gaze,
+        webcam,
+        cellWidth,
+        cellHeight,
+        screenWidth,
+        screenHeight,
+    ):
         self.xcoeffs = xcoeffs
         self.ycoeffs = ycoeffs
         self.gaze = gaze
@@ -18,7 +29,7 @@ class MouseController():
         self.gridWidth = screenWidth // cellWidth
         self.gridHeight = screenHeight // cellHeight
 
-        # Moving average 
+        # Moving average
         self.xDataFrame = []
         self.yDataFrame = []
         self.avgFrames = 3
@@ -44,21 +55,48 @@ class MouseController():
 
             if left_pupil and right_pupil:
                 # Process pupil data and get pixels
-                eyegaze = [(left_pupil[0] + right_pupil[0]) / 2, (left_pupil[1] + right_pupil[1]) / 2]
+                eyegaze = [
+                    (left_pupil[0] + right_pupil[0]) / 2,
+                    (left_pupil[1] + right_pupil[1]) / 2,
+                ]
                 smoothedAvg = self.movingAverage(eyegaze)
-                xPixel = np.clip(int(self.xcoeffs[0] * smoothedAvg[0] ** 2 + self.xcoeffs[1] * smoothedAvg[0] + self.xcoeffs[2]), 0,self.gridWidth-1)*self.cellWidth+self.cellWidth/2
-                yPixel = np.clip(int(self.ycoeffs[0] * smoothedAvg[1] ** 2 + self.ycoeffs[1] * smoothedAvg[1] + self.ycoeffs[2]), 0, self.gridHeight-1)*self.cellHeight+self.cellWidth/2
-                pyautogui.moveTo(xPixel, yPixel) # move to point on screen
-        
+                xPixel = (
+                    np.clip(
+                        int(
+                            self.xcoeffs[0] * smoothedAvg[0] ** 2
+                            + self.xcoeffs[1] * smoothedAvg[0]
+                            + self.xcoeffs[2]
+                        ),
+                        0,
+                        self.gridWidth - 1,
+                    )
+                    * self.cellWidth
+                    + self.cellWidth / 2
+                )
+                yPixel = (
+                    np.clip(
+                        int(
+                            self.ycoeffs[0] * smoothedAvg[1] ** 2
+                            + self.ycoeffs[1] * smoothedAvg[1]
+                            + self.ycoeffs[2]
+                        ),
+                        0,
+                        self.gridHeight - 1,
+                    )
+                    * self.cellHeight
+                    + self.cellWidth / 2
+                )
+                pyautogui.moveTo(xPixel, yPixel)  # move to point on screen
+
         self.webcam.release()
         cv2.destroyAllWindows()
 
     def movingAverage(self, eyeGaze):
         self.xDataFrame.append(eyeGaze[0])
-        if(len(self.xDataFrame) > self.avgFrames):
+        if len(self.xDataFrame) > self.avgFrames:
             self.xDataFrame.pop(0)
         self.yDataFrame.append(eyeGaze[1])
-        if (len(self.yDataFrame) > self.avgFrames):
+        if len(self.yDataFrame) > self.avgFrames:
             self.yDataFrame.pop(0)
         return [np.mean(self.xDataFrame), np.mean(self.yDataFrame)]
 

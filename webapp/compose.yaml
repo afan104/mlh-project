@@ -1,0 +1,20 @@
+services:
+  godaddy:
+    restart: always
+    domainname: eyemalwayswatching.online
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - mode: ingress
+        target: 5000
+        published: 5000
+    deploy:
+     resources:
+       reservations:
+         memory: 256M
+    #environment:
+    #  - API_KEY
+    #  - API_SECRET
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]

@@ -12,6 +12,7 @@ import pyautogui
 import numpy as np
 import time
 
+
 class CalibrateScreen(tk.Frame):
     def __init__(self, window, gazeObject, camObject, cellWidth, cellHeight, app):
         self.window = window
@@ -141,8 +142,6 @@ class CalibrateScreen(tk.Frame):
         self.dotShowing = True  # turns on gaze tracking
         self.window.after(2000, self.dot_off)
 
-        
-
     def dot_off(self, event=None):
         """
         After 2 seconds, turns off measuring at dot and stops gaze tracking.
@@ -159,10 +158,10 @@ class CalibrateScreen(tk.Frame):
 
                 # make next one red
                 if self.currentPosition != len(self.dotPositions):
-                       self.create_dot(self.currentPosition, fill="red")
+                    self.create_dot(self.currentPosition, fill="red")
                 else:
                     self.calibrate = False
-                    self.window.attributes('-fullscreen', False)
+                    self.window.attributes("-fullscreen", False)
                     self.window.destroy()
                     self.exit_fullscreen()
             elif self.failCollection < 10:
@@ -172,7 +171,7 @@ class CalibrateScreen(tk.Frame):
             else:
                 print("Failed calibration. Please try again with different lighting.")
                 self.calibrate = False
-                self.window.attributes('-fullscreen', False)
+                self.window.attributes("-fullscreen", False)
                 self.window.destroy()
                 self.webcam.release()
                 cv2.destroyAllWindows()
@@ -182,14 +181,14 @@ class CalibrateScreen(tk.Frame):
         """
         Tracks the gaze of the user and records the pupil position data.
         """
-    
-        while(self.calibrate):
-            if (self.collectData):
+
+        while self.calibrate:
+            if self.collectData:
                 ret, frame = self.webcam.read()
-                if not ret or frame is None: 
+                if not ret or frame is None:
                     print("Error getting frames.")
                     self.calibrate = False
-                    self.window.attributes('-fullscreen', False)
+                    self.window.attributes("-fullscreen", False)
                     self.window.destroy()
                     self.webcam.release()
                     cv2.destroyAllWindows()
@@ -200,9 +199,16 @@ class CalibrateScreen(tk.Frame):
                 left_pupil = self.gaze.pupil_left_coords()
                 right_pupil = self.gaze.pupil_right_coords()
 
-                if left_pupil and right_pupil and self.currentPosition < len(self.dotPositions):
+                if (
+                    left_pupil
+                    and right_pupil
+                    and self.currentPosition < len(self.dotPositions)
+                ):
                     # Record the average gaze position
-                    avgGaze = [(left_pupil[0] + right_pupil[0]) / 2, (left_pupil[1] + right_pupil[1]) / 2]
+                    avgGaze = [
+                        (left_pupil[0] + right_pupil[0]) / 2,
+                        (left_pupil[1] + right_pupil[1]) / 2,
+                    ]
                     with self.lock:
                         self.eyeData[self.currentPosition].append(avgGaze)
                         print(self.eyeData)
@@ -210,58 +216,44 @@ class CalibrateScreen(tk.Frame):
                 time.sleep(0.1)
         print("done")
 
-
-        # when all corners have been calibrated, calculate the coefficients
-        if self.currentPosition == len(self.dotPositions):
-            # clear screen
-            for widget in self.app.root.winfo_children():
-                widget.destroy()
-            # TODO: calculating coefficients
-
-            # Display message that calibrating/complete calibration
-            self.window.attributes("-fullscreen", False)
-            self.window.geometry("800x600")
-            ttk.Label(self.app.root, text="Calibration complete").pack(pady=20)
-
     def exit_fullscreen(self, event=None):
         # mappingfunction
-        if self.failCollection < 0:
+        if self.failCollection == 0:
+            # code for calculating coefficients....
+
             self.calculateFunctionGrid()
 
         # stop thread
         self.calibrate = False
-        if self.gazeThread.is_alive():
-            self.gazeThread.join()
-
+        # if self.gazeThread.is_alive():
+        #     self.gazeThread.join()
 
     def calculateFunctionGrid(self):
-        # setup grid 
+        # setup grid
         gridWidth = self.screenWidth // self.cellWidth
         gridHeight = self.screenHeight // self.cellHeight
 
-        # stack the eye data for each dot 
+        # stack the eye data for each dot
         data = np.vstack(self.eyeData)
-        x_eye = data[:,0]
-        y_eye = x_eye = data[:,1]
+        x_eye = data[:, 0]
+        y_eye = x_eye = data[:, 1]
 
         # stack the targets data
         targets = []
         for i in range(len(self.dotPositions)):
-            xPix = int(self.dotPositions[i][0]*gridWidth) # x
-            yPix = int(self.dotPositions[i][1]*gridHeight) # y
+            xPix = int(self.dotPositions[i][0] * gridWidth)  # x
+            yPix = int(self.dotPositions[i][1] * gridHeight)  # y
             for j in range(len(self.eyeData[i])):
                 targets.append([xPix, yPix])
         targets = np.array(targets)
-        x_pixel = np.array(targets[:,0])
-        y_pixel = np.array(targets[:,1])
+        x_pixel = np.array(targets[:, 0])
+        y_pixel = np.array(targets[:, 1])
 
         # calculate polyfit
-        self.app.xcoeffs = np.polyfit(x_eye, x_pixel, 2)
-        self.app.ycoeffs = np.polyfit(y_eye, y_pixel, 2)
+        self.app.xcoeff = np.polyfit(x_eye, x_pixel, 2)
+        self.app.ycoeff = np.polyfit(y_eye, y_pixel, 2)
         print(x_eye)
         print(y_eye)
         print(x_pixel)
         print(y_pixel)
-        print(f"{self.xcoeffs}, {self.ycoeffs}")
-    
-    
+        print(f"{self.app.xcoeff}, {self.app.ycoeff}")
