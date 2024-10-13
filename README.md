@@ -13,7 +13,7 @@ This is a simple eye controlled mouse. It takes input from the webcam, calculate
 3. Helper functions to Play With: 
     Helper functions are provided that you can use a basis for improving accuracy on webpages. It finds the clickable elements on the webpage and weights the mouse location towards the clickable elements. 
 
-## Use
+## How to Use
 
 Calibration
 1. The first dot will be red. 
