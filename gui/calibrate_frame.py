@@ -74,13 +74,26 @@ class CalibrateScreen(tk.Frame):
         Displays instructions to look at red dot.
         Creates a color changing block to indicate progress.
         """
-        self.message = self.canvas.create_text(
-            self.width // 3,
-            self.height // 6,
-            text="Look at the red dot for 2 seconds. \nPress space to begin timer.",
-            font=("Arial", 24),
-            fill="black",
+        labelTop = ttk.Label(
+            self.app.root,
+            text="Look at the red dot until it turns green.",
+            style="BoldInfo.TLabel",
         )
+        labelTop.place(x=100, y=50)
+        labelBottom = ttk.Label(
+            self.app.root,
+            text="Press space to continue.                           ",
+            style="ItalicInfo.TLabel",
+        )
+        labelBottom.place(x=100, y=100)
+
+        # self.message = self.canvas.create_text(
+        #     self.width // 3,
+        #     self.height // 6,
+        #     text="Look at the red dot for 2 seconds. \nPress space to begin timer.",
+        #     font=("Arial", 24),
+        #     fill="white",
+        # )
 
     def create_dot(self, corner_index, fill, outline=""):
         """
@@ -123,8 +136,8 @@ class CalibrateScreen(tk.Frame):
         x = self.width * self.corners[self.current_corner][0]
         y = self.height * self.corners[self.current_corner][1]
 
-        # Make dot green and start gaze tracking collection
-        self.create_dot(self.current_corner, fill="green")
+        # Make dot yellow and start gaze tracking collection
+        self.create_dot(self.current_corner, fill="yellow")
 
         self.dotShowing = True  # turns on gaze tracking
         self.window.after(2000, self.dot_off)
@@ -134,10 +147,10 @@ class CalibrateScreen(tk.Frame):
     def dot_off(self, event=None):
         """
         After 2 seconds, turns off measuring at dot and stops gaze tracking.
-        Changes dot to black color and next dot to red color.
+        Changes dot to green color and next dot to red color.
         """
         self.dotShowing = False  # turns off gaze tracking
-        self.create_dot(self.current_corner - 1, fill="black")
+        self.create_dot(self.current_corner - 1, fill="green")
 
         # make next one red
         if self.current_corner != len(self.corners):
@@ -163,12 +176,14 @@ class CalibrateScreen(tk.Frame):
                     # Record the average gaze position
                     avgGaze = self.avgPosition(left_pupil, right_pupil)
                     self.eyeData[self.current_corner].append(avgGaze)
+
         # when all corners have been calibrated, calculate the coefficients
         if self.current_corner == len(self.corners):
             # clear screen
             for widget in self.app.root.winfo_children():
                 widget.destroy()
             # TODO: calculating coefficients
+
             # Display message that calibrating/complete calibration
             self.window.attributes("-fullscreen", False)
             self.window.geometry("800x600")
