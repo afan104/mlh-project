@@ -2,12 +2,14 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from calibrate_frame import CalibrateScreen
+from mouse_controller import MouseController
+import pyautogui
 import cv2
 from GazeTracking.gaze_tracking import GazeTracking
 
 
-class EyeTrackingApp(tk.Tk, gaze, webcam):
-    def __init__(self, root, theme="morph"):
+class EyeTrackingApp(tk.Tk):
+    def __init__(self, root, gaze, webcam, theme="morph"):
         self.root = root
         self.gaze = gaze
         self.webcam = webcam
@@ -63,9 +65,16 @@ class EyeTrackingApp(tk.Tk, gaze, webcam):
 
 
 if __name__ == "__main__":
+    cellWidth  = 20
+    cellHeight = 20
+    screenWidth = pyautogui.size()[0]
+    screenHeight = pyautogui.size()[1]
     gaze = GazeTracking()
     webcam = cv2.VideoCapture(0)
 
     root = tk.Tk()
     app = EyeTrackingApp(root, gaze, webcam)
     root.mainloop()
+
+    # Start tracking
+    # app = MouseController(app.xcoeff, app.ycoeff, gaze, webcam, cellWidth, cellHeight, screenWidth, screenHeight)

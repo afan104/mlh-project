@@ -1,0 +1,67 @@
+import cv2
+from GazeTracking.gaze_tracking import GazeTracking
+import pyautogui
+import numpy as np
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+class MouseController():
+    def __init__(self, xcoeffs, ycoeffs, gaze, webcam, cellWidth, cellHeight, screenWidth, screenHeight):
+        self.xcoeffs = xcoeffs
+        self.ycoeffs = ycoeffs
+        self.gaze = gaze
+        self.webcam = webcam
+
+        self.cellWidth = cellWidth
+        self.cellHeight = cellHeight
+        self.screenWidth = screenWidth
+        self.screenHeight = screenHeight
+
+        self.gridWidth = screenWidth // cellWidth
+        self.gridHeight = screenHeight // cellHeight
+
+        # Moving average 
+        self.xDataFrame = []
+        self.yDataFrame = []
+        self.avgFrames = 3
+
+        self.startController()
+
+    def startController(self):
+        controlMouse = True
+        while controlMouse:
+            if cv2.waitKey(1) == 27:
+                controlMouse = False
+                break
+
+            # We get a new frame from the webcam
+            _, frame = self.webcam.read()
+
+            # We send this frame to GazeTracking to analyze it
+            self.gaze.refresh(frame)
+
+            # Get pupil Data
+            left_pupil = self.gaze.pupil_left_coords()
+            right_pupil = self.gaze.pupil_right_coords()
+
+            if left_pupil and right_pupil:
+                # Process pupil data and get pixels
+                eyegaze = [(left_pupil[0] + right_pupil[0]) / 2, (left_pupil[1] + right_pupil[1]) / 2]
+                smoothedAvg = self.movingAverage(eyegaze)
+                xPixel = np.clip(int(self.xcoeffs[0] * smoothedAvg[0] ** 2 + self.xcoeffs[1] * smoothedAvg[0] + self.xcoeffs[2]), 0, gridWidth-1)*cellWidth+cellWidth/2
+                yPixel = np.clip(int(self.ycoeffs[0] * smoothedAvg[1] ** 2 + self.ycoeffs[1] * smoothedAvg[1] + self.ycoeffs[2]), 0, gridHeight-1)*cellHeight+cellWidth/2
+                pyautogui.moveTo(xPixel, yPixel) # move to point on screen
+        
+        self.webcam.release()
+        cv2.destroyAllWindows()
+
+    def movingAverage(self, eyeGaze):
+        self.xDataFrame.append(eyeGaze[0])
+        if(len(self.xDataFrame) > self.avgFrames):
+            self.xDataFrame.pop(0)
+        self.yDataFrame.append(eyeGaze[1])
+        if (len(self.yDataFrame) > self.avgFrames):
+            self.yDataFrame.pop(0)
+        return [np.mean(self.xDataFrame), np.mean(self.yDataFrame)]
+
