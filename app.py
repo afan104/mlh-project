@@ -65,10 +65,11 @@ class EyeTrackingApp(tk.Tk):
 
 
 if __name__ == "__main__":
-    cellWidth  = 20
+    cellWidth  = 20 
     cellHeight = 20
     screenWidth = pyautogui.size()[0]
     screenHeight = pyautogui.size()[1]
+
     gaze = GazeTracking()
     webcam = cv2.VideoCapture(0)
 
@@ -77,4 +78,8 @@ if __name__ == "__main__":
     root.mainloop()
 
     # Start tracking
-    # app = MouseController(app.xcoeff, app.ycoeff, gaze, webcam, cellWidth, cellHeight, screenWidth, screenHeight)
+    if app.xcoeff != None and app.ycoeff != None:
+        app = MouseController(app.xcoeff, app.ycoeff, gaze, webcam, cellWidth, cellHeight, screenWidth, screenHeight)
+
+    webcam.release()
+    cv2.destroyAllWindows()

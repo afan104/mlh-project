@@ -66,9 +66,10 @@ class CalibrateScreen(tk.Frame):
         # Create a thread to track the gaze
         self.collectData = False
         self.calibrate = True
-        self.gaze_thread = threading.Thread(target=self.track_gaze, daemon=True)
-        self.gaze_thread.start()
+        self.gazeThread = threading.Thread(target=self.track_gaze, daemon=False)
+        self.gazeThread.start()
         self.lock = threading.Lock()
+        self.failCollection = 0
 
         # Timing variables
         self.timeDelay = 500
@@ -101,10 +102,10 @@ class CalibrateScreen(tk.Frame):
         x = self.width * corner[0]
         y = self.height * corner[1]
         self.canvas.create_oval(
-            x - self.dot_size / 2,
-            y - self.dot_size / 2,
-            x + self.dot_size / 2,
-            y + self.dot_size / 2,
+            x - self.dotSize / 2,
+            y - self.dotSize / 2,
+            x + self.dotSize / 2,
+            y + self.dotSize / 2,
             fill=fill,
             outline=outline,
             tags="dot",
@@ -148,8 +149,9 @@ class CalibrateScreen(tk.Frame):
         Changes dot to green color and next dot to red color.
         """
         with self.lock:
-            if len(self.eyeData[self.currentPosition]) > 10:
+            if len(self.eyeData[self.currentPosition]) > 5:
                 self.collectData = False
+                self.failCollection = 0
 
                 self.currentPosition += 1
                 self.dotShowing = False  # turns off gaze tracking
@@ -157,12 +159,24 @@ class CalibrateScreen(tk.Frame):
 
                 # make next one red
                 if self.currentPosition != len(self.dotPositions):
-                    self.create_dot(self.currentPosition, fill="red")
+                       self.create_dot(self.currentPosition, fill="red")
                 else:
-                    self.finish_calibration()
-            else:
+                    self.calibrate = False
+                    self.window.attributes('-fullscreen', False)
+                    self.window.destroy()
+                    self.exit_fullscreen()
+            elif self.failCollection < 10:
                 print("not enough data collected, waiting...")
-                self.window.after(100, self.dot_off)
+                self.failCollection += 1
+                self.window.after(500, self.dot_off)
+            else:
+                print("Failed calibration. Please try again with different lighting.")
+                self.calibrate = False
+                self.window.attributes('-fullscreen', False)
+                self.window.destroy()
+                self.webcam.release()
+                cv2.destroyAllWindows()
+                self.exit_fullscreen()
 
     def track_gaze(self):
         """
@@ -171,7 +185,16 @@ class CalibrateScreen(tk.Frame):
     
         while(self.calibrate):
             if (self.collectData):
-                _, frame = self.webcam.read()
+                ret, frame = self.webcam.read()
+                if not ret or frame is None: 
+                    print("Error getting frames.")
+                    self.calibrate = False
+                    self.window.attributes('-fullscreen', False)
+                    self.window.destroy()
+                    self.webcam.release()
+                    cv2.destroyAllWindows()
+                    self.exit_fullscreen()
+                    break
                 self.gaze.refresh(frame)
 
                 left_pupil = self.gaze.pupil_left_coords()
@@ -182,9 +205,10 @@ class CalibrateScreen(tk.Frame):
                     avgGaze = [(left_pupil[0] + right_pupil[0]) / 2, (left_pupil[1] + right_pupil[1]) / 2]
                     with self.lock:
                         self.eyeData[self.currentPosition].append(avgGaze)
-                        # print(self.eyeData)
+                        print(self.eyeData)
             else:
                 time.sleep(0.1)
+        print("done")
 
 
         # when all corners have been calibrated, calculate the coefficients
@@ -200,17 +224,15 @@ class CalibrateScreen(tk.Frame):
             ttk.Label(self.app.root, text="Calibration complete").pack(pady=20)
 
     def exit_fullscreen(self, event=None):
+        # mappingfunction
+        if self.failCollection < 0:
+            self.calculateFunctionGrid()
+
         # stop thread
         self.calibrate = False
-        if self.gaze_thread.is_alive():
-            self.gaze_thread.join()
+        if self.gazeThread.is_alive():
+            self.gazeThread.join()
 
-        # close calibration window
-        self.window.attributes('-fullscreen', False)
-        self.window.destroy()
-
-        # mappingfunction
-        self.calculateFunctionGrid()
 
     def calculateFunctionGrid(self):
         # setup grid 
@@ -236,6 +258,10 @@ class CalibrateScreen(tk.Frame):
         # calculate polyfit
         self.app.xcoeffs = np.polyfit(x_eye, x_pixel, 2)
         self.app.ycoeffs = np.polyfit(y_eye, y_pixel, 2)
+        print(x_eye)
+        print(y_eye)
+        print(x_pixel)
+        print(y_pixel)
         print(f"{self.xcoeffs}, {self.ycoeffs}")
     
     
