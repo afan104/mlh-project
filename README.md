@@ -4,13 +4,13 @@
 This is a simple eye controlled mouse. It takes input from the webcam, calculates the pupil location on the webcam frame and converts it using quadratic equations to pixels on the screen. 
 
 ## Features
-1. Simple setup and calibration 
+1. Simple setup and calibration:
     Calibration takes less than a minute. Center your face in front of the computer screen and hold your head still. Look at a series of nine dots for 2 seconds each. Your eye positions will then be mapped to the pixels on the screen. Then start playing! 
 
-2. Easy to use GUI 
+2. Easy to use GUI:
     The GUI provides simple instructions to calibrate your controller. 
 
-3. Helper functions to Play With 
+3. Helper functions to Play With: 
     Helper functions are provided that you can use a basis for improving accuracy on webpages. It finds the clickable elements on the webpage and weights the mouse location towards the clickable elements. 
 
 ## Use
