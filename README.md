@@ -61,7 +61,7 @@ This project is a basis for a free, simple gaze controlled mouse. Future directi
 For people with motor disorders, using a mouse can be difficult. Eye tracking technology makes using computers more accessible. However the technology can be expensive, or require extensive calibration. We wanted to make an easy to setup and use eye controlled mouse that could be calibrated in a couple minutes, and have enough accuracy to be useable.
 
 ## File Locations
-1. testing.py: contains the working code for calibrating the controller and using the eye controlled mouse.
+1. testing_amy.py: contains the working code for calibrating the controller and using the eye controlled mouse.
 2. app.py is the starting code for the improved user interface.
 3. calibrate_frame.py: contains the class to the calibrate using the improved interface.
 4. mouse_controller.py: contains the class to move the mouse using the calibration coefficients. 
